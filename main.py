@@ -42,7 +42,7 @@ class Favorite(db.Model):
     owner = relationship("User", back_populates="favorites")
 
 
-db.create_all()
+# db.create_all()
 
 
 def admin_only(f):
@@ -149,8 +149,8 @@ def home():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        if User.query.filter_by(email=form.email.data).first():
-            flash("A user with that email already exists. please login.")
+        if User.query.filter_by(email=form.email.data.lower()).first():
+            flash("A user with that email already exists. Please login.")
             return redirect(url_for('login'))
         else:
             hashed_password = generate_password_hash(
@@ -160,7 +160,7 @@ def register():
             )
             new_user = User(
                 name=form.name.data,
-                email=form.email.data,
+                email=form.email.data.lower(),
                 password=hashed_password
             )
             db.session.add(new_user)
@@ -174,7 +174,7 @@ def register():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data.lower()).first()
         if user:
             if check_password_hash(user.password, form.password.data):
                 login_user(user)
