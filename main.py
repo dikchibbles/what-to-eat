@@ -1,0 +1,222 @@
+from flask import Flask, render_template, redirect, abort, url_for, flash
+import requests
+from flask_wtf.csrf import CSRFProtect
+from wordsegment import load, segment
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import relationship
+from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+from functools import wraps
+from forms import LoginForm, RegisterForm
+
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'sajfipnzxp994358hkjsadnfal'
+
+### Database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+### CSRF Protection
+csrf = CSRFProtect(app)
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+
+class User(UserMixin, db.Model):
+    __tablename__ = "users"
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), unique=True)
+    password = db.Column(db.String(100))
+    name = db.Column(db.String(100))
+    favorites = relationship("Favorite", back_populates="owner")
+
+
+class Favorite(db.Model):
+    __tablename__ = 'favorites'
+    id = db.Column(db.Integer, primary_key=True)
+    recipe_id = db.Column(db.Integer)
+    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    owner = relationship("User", back_populates="favorites")
+
+
+db.create_all()
+
+
+def admin_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if current_user.is_anonymous:
+            return abort(403)
+        elif current_user.id != 1:
+            return abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
+
+
+def random_dish(dish_type):
+    url = "https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/random"
+    querystring = {"tags": f"{dish_type}", "number": "1"}
+    headers = {
+        'x-rapidapi-host': "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com",
+        'x-rapidapi-key': "4122f3483amsh58a4641df90e077p13dbeejsn7d92b5bcd947"
+    }
+    response = requests.request("GET", url, headers=headers,
+                                params=querystring).json()
+    recipe = response['recipes'][0]
+    category = ''
+    for key in list(recipe)[:8]:
+        if recipe[key]:
+            load()
+            category_list = segment(key)
+            category = ' '.join(category_list).lower()
+            break
+    dish_name = recipe['title']
+    try:
+        image = recipe['image']
+    except KeyError:
+        url = "https://bing-image-search1.p.rapidapi.com/images/search"
+        querystring = {"q": f"{dish_name}"}
+        headers = {
+            'x-rapidapi-host': "bing-image-search1.p.rapidapi.com",
+            'x-rapidapi-key': "4122f3483amsh58a4641df90e077p13dbeejsn7d92b5bcd947"
+        }
+        response = requests.request("GET", url, headers=headers,
+                                    params=querystring).json()
+        image = response['value'][0]['thumbnailUrl']
+    instructions = recipe['instructions']
+    ingredients = [ingredient['original'] for ingredient in recipe['extendedIngredients']]
+    return dish_name, image, instructions, ingredients, category
+
+
+@app.route('/')
+def home():
+    url = "https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/random"
+    headers = {
+        'x-rapidapi-host': "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com",
+        'x-rapidapi-key': "4122f3483amsh58a4641df90e077p13dbeejsn7d92b5bcd947"
+    }
+    response = requests.get(url, headers=headers).json()
+    recipe = response['recipes'][0]
+    print(recipe)
+    category = ''
+    for key in list(recipe)[:8]:
+        if recipe[key]:
+            load()
+            category_list = segment(key)
+            category = ' '.join(category_list).lower()
+            break
+    dish_name = recipe['title']
+    try:
+        image = recipe['image']
+    except KeyError:
+        url = "https://bing-image-search1.p.rapidapi.com/images/search"
+        querystring = {"q": f"{dish_name}"}
+        headers = {
+            'x-rapidapi-host': "bing-image-search1.p.rapidapi.com",
+            'x-rapidapi-key': "4122f3483amsh58a4641df90e077p13dbeejsn7d92b5bcd947"
+        }
+        response = requests.request("GET", url, headers=headers,
+                                    params=querystring).json()
+        image = response['value'][0]['thumbnailUrl']
+    instructions = recipe['instructions']
+    ingredients = []
+    for ingredient in recipe['extendedIngredients']:
+        ingredients.append(ingredient['original'])
+    return render_template('index.html',
+                           dish_name=dish_name,
+                           image=image,
+                           instructions=instructions,
+                           ingredients=ingredients,
+                           category=category,
+                           current_user=current_user)
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        if User.query.filter_by(email=form.email.data).first():
+            flash("A user with that email already exists")
+            return redirect(url_for('login'))
+        else:
+            hashed_password = generate_password_hash(
+                form.password.data,
+                method='pbkdf2:sha256',
+                salt_length=8
+            )
+            new_user = User(
+                name=form.name.data,
+                email=form.email.data,
+                password=hashed_password
+            )
+            db.session.add(new_user)
+            db.session.commit()
+            login_user(new_user)
+            return redirect(url_for('home'))
+    return render_template("register.html", form=form)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            pass
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
+
+@app.route('/appetizer')
+def appetizer():
+    dish_name, image, instructions, ingredients, category = random_dish('appetizer')
+    return render_template('index.html',
+                           dish_name=dish_name,
+                           image=image,
+                           instructions=instructions,
+                           ingredients=ingredients,
+                           category=category)
+
+
+@app.route('/main')
+def main():
+    dish_name, image, instructions, ingredients, category = random_dish('dinner')
+    return render_template('index.html',
+                           dish_name=dish_name,
+                           image=image,
+                           instructions=instructions,
+                           ingredients=ingredients,
+                           category=category)
+
+
+@app.route('/dessert')
+def dessert():
+    dish_name, image, instructions, ingredients, category = random_dish('dessert')
+    return render_template('index.html',
+                           dish_name=dish_name,
+                           image=image,
+                           instructions=instructions,
+                           ingredients=ingredients,
+                           category=category)
+
+
+@app.route('/favorites')
+def favorites():
+    pass
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
