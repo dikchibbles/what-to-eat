@@ -144,7 +144,7 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         if User.query.filter_by(email=form.email.data).first():
-            flash("A user with that email already exists")
+            flash("A user with that email already exists. please login.")
             return redirect(url_for('login'))
         else:
             hashed_password = generate_password_hash(
@@ -170,7 +170,15 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
-            pass
+            if check_password_hash(user.password, form.password.data):
+                login_user(user)
+                return redirect(url_for('home'))
+            elif not check_password_hash(user.password, form.password.data):
+                flash('Incorrect info. Please try again.')
+        elif not user:
+            flash('User with that email does not exist, please register.')
+            return redirect(url_for('register'))
+    return render_template("login.html", form=form)
 
 
 @app.route('/logout')

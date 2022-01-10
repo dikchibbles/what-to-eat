@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+	<div class="row justify-content-md-center">
+		<div class="col-lg-4 col-md-6 col-sm-12">
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+					{% for message in messages %}
+						<p style="color:red;">{{ message }}</p>
+					{% endfor %}
+				{% endif %}
+			{% endwith %}
+			<form action="{{ url_for('login') }}" method="POST">
+				{{ form.csrf_token }}
+				<label for="exampleInputEmail1" class="form-label">Email address</label>
+				{{ form.email(type="email", class="form-control", id="exampleInputEmail1", placeholder="Email") }}
+				<label for="InputPassword" class="form-label">Password</label>
+				{{ form.password(type="password", class="form-control", id="InputPassword", placeholder="Password") }}
+				<div class="submit">{{ form.submit(type="submit", class="btn btn-primary") }}</div>
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock %}
