@@ -93,7 +93,13 @@ def random_dish(dish_type):
         image = response['value'][0]['thumbnailUrl']
     instructions = recipe['instructions']
     ingredients = [ingredient['original'] for ingredient in recipe['extendedIngredients']]
-    return dish_name, image, instructions, ingredients, category
+    return render_template('index.html',
+                           dish_name=dish_name,
+                           image=image,
+                           instructions=instructions,
+                           ingredients=ingredients,
+                           category=category,
+                           current_user=current_user)
 
 
 @app.route('/')
@@ -190,35 +196,17 @@ def logout():
 
 @app.route('/appetizer')
 def appetizer():
-    dish_name, image, instructions, ingredients, category = random_dish('appetizer')
-    return render_template('index.html',
-                           dish_name=dish_name,
-                           image=image,
-                           instructions=instructions,
-                           ingredients=ingredients,
-                           category=category)
+    return random_dish('appetizer')
 
 
 @app.route('/main')
 def main():
-    dish_name, image, instructions, ingredients, category = random_dish('dinner')
-    return render_template('index.html',
-                           dish_name=dish_name,
-                           image=image,
-                           instructions=instructions,
-                           ingredients=ingredients,
-                           category=category)
+    return random_dish('dinner')
 
 
 @app.route('/dessert')
 def dessert():
-    dish_name, image, instructions, ingredients, category = random_dish('dessert')
-    return render_template('index.html',
-                           dish_name=dish_name,
-                           image=image,
-                           instructions=instructions,
-                           ingredients=ingredients,
-                           category=category)
+    return random_dish('dessert')
 
 
 @app.route('/favorites')
