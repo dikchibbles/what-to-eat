@@ -17,18 +17,27 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-6 recipe-name text-start">
-                            <h4>some name</h4>
-                        </div>
-                        <div class="col-6 text-end">
-                            <h4>{{ category }}</h4>
-                        </div>
+                        {% if current_user.is_authenticated %}
+                            <div class="col-6 recipe-name text-start">
+                                <form action="{{ url_for('add_favorite', recipe_id=recipe_id, recipe_name=dish_name) }}" method="post">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button type="submit" name="add" value="Add" class="btn btn-primary btn-sm">Add to Favorites</button>
+                                </form>
+                            </div>
+                            <div class="col-6 text-end">
+                                <h4>{{ category }}</h4>
+                            </div>
+                        {% else %}
+                            <div class="col-6 text-start">
+                                <h4>{{ category }}</h4>
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="row">
                         <div class="col-12">
                             <ol class="list-group">
                                 {% for ingredient in ingredients: %}
-                                <li class="list-group-item list-group-item-light">{{ ingredient }}</li>
+                                    <li class="list-group-item list-group-item-light">{{ ingredient }}</li>
                                 {% endfor %}
                             </ol>
                             <p class="instructions">{{ instructions | safe }}</p>

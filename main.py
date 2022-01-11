@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, abort, url_for, flash
+from flask import Flask, render_template, redirect, abort, url_for, flash, request
 import requests
 from flask_wtf.csrf import CSRFProtect
 from wordsegment import load, segment
@@ -99,13 +99,15 @@ def random_dish(dish_type):
         image = response['value'][0]['thumbnailUrl']
     instructions = recipe['instructions']
     ingredients = [ingredient['original'] for ingredient in recipe['extendedIngredients']]
+    recipe_id = recipe['id']
     return render_template('index.html',
                            dish_name=dish_name,
                            image=image,
                            instructions=instructions,
                            ingredients=ingredients,
                            category=category,
-                           current_user=current_user)
+                           current_user=current_user,
+                           recipe_id=recipe_id)
 
 
 @app.route('/')
@@ -117,7 +119,6 @@ def home():
     }
     response = requests.get(url, headers=headers).json()
     recipe = response['recipes'][0]
-    print(recipe)
     category = ''
     for key in list(recipe)[:8]:
         if recipe[key]:
@@ -142,13 +143,15 @@ def home():
     ingredients = []
     for ingredient in recipe['extendedIngredients']:
         ingredients.append(ingredient['original'])
+    recipe_id = recipe['id']
     return render_template('index.html',
                            dish_name=dish_name,
                            image=image,
                            instructions=instructions,
                            ingredients=ingredients,
                            category=category,
-                           current_user=current_user)
+                           current_user=current_user,
+                           recipe_id=recipe_id)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -220,16 +223,35 @@ def get_recipe(recipe_id):
     pass
 
 
-@app.route('/add_favorite/<int:recipe_id>')
-def add_favorite(recipe_id):
-    pass
+@app.route('/add_favorite/<int:recipe_id>/<recipe_name>', methods=['GET', 'POST'])
+@login_required
+def add_favorite(recipe_id, recipe_name):
+    if request.method == 'POST':
+        new_favorite = Favorite(
+            recipe_name=recipe_name,
+            recipe_id=recipe_id,
+            owner=current_user
+        )
+        db.session.add(new_favorite)
+        db.session.commit()
+        return redirect(url_for('favorites'))
+
+
+@app.route('/delete/<int:recipe_id>')
+@login_required
+def delete(recipe_id):
+    recipe_to_delete = Favorite.query.get(recipe_id)
+    db.session.delete(recipe_to_delete)
+    db.session.commit()
+    return redirect(url_for('favorites'))
 
 
 @app.route('/favorites')
 @login_required
 def favorites():
-    dishes = Favorite.query.all()
-    return render_template("favorites.html", dishes=dishes)
+    if current_user.is_authenticated:
+        dishes = Favorite.query.filter_by(owner=current_user).all()
+        return render_template("favorites.html", dishes=dishes)
 
 
 if __name__ == '__main__':
