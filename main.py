@@ -62,6 +62,11 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 
+@app.errorhandler(401)
+def forbidden_access(e):
+    return render_template('401.html'), 401
+
+
 def random_dish(dish_type):
     url = "https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/random"
     querystring = {"tags": f"{dish_type}", "number": "1"}
@@ -221,6 +226,7 @@ def add_favorite(recipe_id):
 
 
 @app.route('/favorites')
+@login_required
 def favorites():
     dishes = Favorite.query.all()
     return render_template("favorites.html", dishes=dishes)
