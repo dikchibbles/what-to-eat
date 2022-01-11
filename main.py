@@ -28,16 +28,17 @@ login_manager.init_app(app)
 class User(UserMixin, db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(100))
-    name = db.Column(db.String(100))
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
     favorites = relationship("Favorite", back_populates="owner")
 
 
 class Favorite(db.Model):
     __tablename__ = 'favorites'
     id = db.Column(db.Integer, primary_key=True)
-    recipe_id = db.Column(db.Integer)
+    recipe_id = db.Column(db.Integer, nullable=False)
+    recipe_name = db.Column(db.String(200), nullable=False)
     owner_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     owner = relationship("User", back_populates="favorites")
 
@@ -209,9 +210,20 @@ def dessert():
     return random_dish('dessert')
 
 
+@app.route('/recipe/<int:recipe_id>')
+def get_recipe(recipe_id):
+    pass
+
+
+@app.route('/add_favorite/<int:recipe_id>')
+def add_favorite(recipe_id):
+    pass
+
+
 @app.route('/favorites')
 def favorites():
-    pass
+    dishes = Favorite.query.all()
+    return render_template("favorites.html", dishes=dishes)
 
 
 if __name__ == '__main__':

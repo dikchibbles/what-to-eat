@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container holder">
+    <div class="row justify-content-md-center">
+        <div class="col-lg-8 col-md-10 col-sm-12">
+            <div class="shadow p-3 mb-5 bg-body rounded">
+				<div class="container">
+					<div class="row justify-content-md-center">
+						<div class="col">
+							<table class="table">
+								<thead>
+									<tr>
+										<th scope="col">Dish Name</th>
+										<th scope="col">Delete</th>
+									</tr>
+								</thead>
+								<tbody>
+								{% for dish in dishes %}
+									<tr>
+										<td><a href="{{ url_for('get_recipe', recipe_id=dish.recipe_id) }}">{{ recipe_name }}</a></td>
+										<td><a href="{{ url_for('delete') }}">╳</a></td>
+									</tr>
+								{% endfor %}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
