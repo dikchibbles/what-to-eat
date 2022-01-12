@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}{{ dish_name }}{% endblock %}
+{% block content %}
+<div class="container holder">
+    <div class="row justify-content-md-center">
+        <div class="col-lg-6 col-md-10 col-sm-12">
+            <div class="shadow p-3 mb-5 bg-body rounded">
+                <div class="container recipe">
+                    <div class="row">
+                        <div class="col-12">
+                            <h4>{{ dish_name }}</h4>
+                        </div>
+                    </div>
+                    <div class="row justify-content-md-center">
+                        <div class="col-12 text-center">
+                            <img class="img-fluid recipe-image" src="{{ image }}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 text-start">
+                            <h4>{{ category }}</h4>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <ol class="list-group">
+                                {% for ingredient in ingredients: %}
+                                    <li class="list-group-item list-group-item-light">{{ ingredient }}</li>
+                                {% endfor %}
+                            </ol>
+                            <p class="instructions">{{ instructions | safe }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
