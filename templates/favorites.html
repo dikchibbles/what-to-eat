@@ -18,7 +18,7 @@
 								{% for dish in dishes %}
 									<tr>
 										<td><a href="{{ url_for('get_recipe', recipe_id=dish.recipe_id) }}">{{ dish.recipe_name }}</a></td>
-										<td><a href="{{ url_for('delete', recipe_id=dish.recipe_id) }}">╳</a></td>
+										<td><a href="{{ url_for('delete', recipe_id=dish.id) }}">╳</a></td>
 									</tr>
 								{% endfor %}
 								</tbody>
