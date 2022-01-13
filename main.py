@@ -1,5 +1,6 @@
-from flask import Flask, render_template, redirect, abort, url_for, flash, request
+from flask import Flask, session, render_template, redirect, abort, url_for, flash, request
 import requests
+from datetime import timedelta
 from flask_wtf.csrf import CSRFProtect
 from wordsegment import load, segment
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -65,6 +66,12 @@ def load_user(user_id):
 @app.errorhandler(401)
 def forbidden_access(e):
     return render_template('401.html'), 401
+
+
+@app.before_request
+def before_request():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=15)
 
 
 def random_dish(dish_type):
