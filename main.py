@@ -264,14 +264,17 @@ def get_recipe(recipe_id):
 @login_required
 def add_favorite(recipe_id, recipe_name):
     if request.method == 'POST':
-        new_favorite = Favorite(
-            recipe_name=recipe_name,
-            recipe_id=recipe_id,
-            owner=current_user
-        )
-        db.session.add(new_favorite)
-        db.session.commit()
-        return redirect(url_for('favorites'))
+        if Favorite.query.filter_by(recipe_name=recipe_name).first():
+            flash("This recipe is already in your favorites.")
+        else:
+            new_favorite = Favorite(
+                recipe_name=recipe_name,
+                recipe_id=recipe_id,
+                owner=current_user
+            )
+            db.session.add(new_favorite)
+            db.session.commit()
+            return redirect(url_for('favorites'))
 
 
 @app.route('/delete/<int:recipe_id>')

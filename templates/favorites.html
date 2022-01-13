@@ -8,19 +8,25 @@
 					<div class="row justify-content-md-center">
 						<div class="col">
 							<table class="table">
-								<thead>
+								{% if dishes %}
+									<thead>
+										<tr>
+											<th scope="col">Dish Name</th>
+											<th scope="col">Delete</th>
+										</tr>
+									</thead>
+									<tbody>
+									{% for dish in dishes %}
+										<tr>
+											<td><a href="{{ url_for('get_recipe', recipe_id=dish.recipe_id) }}">{{ dish.recipe_name }}</a></td>
+											<td><a href="{{ url_for('delete', recipe_id=dish.id) }}">╳</a></td>
+										</tr>
+									{% endfor %}
+								{% else %}
 									<tr>
-										<th scope="col">Dish Name</th>
-										<th scope="col">Delete</th>
+										<td><h3>Nothing here, go find something delicious!</h3></td>
 									</tr>
-								</thead>
-								<tbody>
-								{% for dish in dishes %}
-									<tr>
-										<td><a href="{{ url_for('get_recipe', recipe_id=dish.recipe_id) }}">{{ dish.recipe_name }}</a></td>
-										<td><a href="{{ url_for('delete', recipe_id=dish.id) }}">╳</a></td>
-									</tr>
-								{% endfor %}
+								{% endif %}
 								</tbody>
 							</table>
 						</div>
