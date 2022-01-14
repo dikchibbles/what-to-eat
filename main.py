@@ -1,5 +1,6 @@
 from flask import Flask, session, render_template, redirect, abort, url_for, flash, request
 import requests
+import os
 from datetime import timedelta
 from flask_wtf.csrf import CSRFProtect
 from wordsegment import load, segment
@@ -12,7 +13,7 @@ from forms import LoginForm, RegisterForm
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'sajfipnzxp994358hkjsadnfal'
+app.config['SECRET_KEY'] = str(os.environ.get('SECRET_KEY'))
 
 ### Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
