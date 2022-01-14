@@ -273,6 +273,7 @@ def add_favorite(recipe_id, recipe_name):
     if request.method == 'POST':
         if Favorite.query.filter_by(recipe_name=recipe_name).first():
             flash("This recipe is already in your favorites.")
+            return redirect(url_for('favorites'))
         else:
             new_favorite = Favorite(
                 recipe_name=recipe_name,
