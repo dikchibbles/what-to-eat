@@ -19,6 +19,11 @@
 				{{ form.email(type="email", class="form-control", id="exampleInputEmail1", placeholder="Email") }}
 				<label for="InputPassword" class="form-label">Password</label>
 				{{ form.password(type="password", class="form-control", id="InputPassword", placeholder="Password") }}
+				{% for error in form.password.errors %}
+                    <span style="color: red;">[{{ error }}]</span><br>
+				{% endfor %}
+				<label for="InputConfirmPassword" class="form-label">Confirm Password</label>
+				{{ form.password_confirm(type="password", class="form-control", id="InputConfirmPassword", placeholder="Confirm Password") }}
 				<div class="submit">{{ form.submit(type="submit", class="btn btn-primary") }}</div>
 			</form>
 		</div>
