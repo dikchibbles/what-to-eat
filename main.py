@@ -226,13 +226,21 @@ def dessert():
     return random_dish('dessert')
 
 
-@app.route('/search/<recipe_name>')
-def search_recipe(recipe_name):
-    return render_template('index.html')
+@app.route('/search/', methods=['GET', 'POST'])
+def search_recipe():
+    if request.method == 'POST':
+        recipe_name = request.form.get('recipe-name')
+        url = "https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/search"
+        querystring = {"query": f"{recipe_name}", "number": "10"}
+        headers = {
+            'x-rapidapi-host': "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com",
+            'x-rapidapi-key': "4122f3483amsh58a4641df90e077p13dbeejsn7d92b5bcd947"
+        }
+        recipes = requests.get(url, params=querystring, headers=headers).json()['results']
+        return render_template('recipes.html', recipes=recipes, current_user=current_user)
 
 
 @app.route('/recipe/<int:recipe_id>')
-@login_required
 def get_recipe(recipe_id):
     url = f"https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/{recipe_id}/information"
     headers = {
@@ -270,7 +278,8 @@ def get_recipe(recipe_id):
                            instructions=instructions,
                            ingredients=ingredients,
                            category=category,
-                           current_user=current_user)
+                           current_user=current_user,
+                           recipe_id=recipe_id)
 
 
 @app.route('/add_favorite/<int:recipe_id>/<recipe_name>', methods=['GET', 'POST'])

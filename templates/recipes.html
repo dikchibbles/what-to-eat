@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container holder">
+    <div class="row justify-content-md-center">
+        <div class="col-lg-8 col-md-10 col-sm-12">
+            <div class="shadow p-3 mb-5 bg-body rounded">
+				<div class="container">
+					<div class="row justify-content-md-center">
+						<div class="col">
+							<table class="table">
+								{% if recipes %}
+									<thead>
+										<tr>
+											<th scope="col">Dish Name</th>
+											<th scope="col">Ready In</th>
+										</tr>
+									</thead>
+									<tbody>
+									{% for recipe in recipes %}
+										<tr>
+											<td><a href="{{ url_for('get_recipe', recipe_id=recipe['id']) }}">{{ recipe['title'] }}</a></td>
+											<td>{{ recipe['readyInMinutes'] }}</td>
+										</tr>
+									{% endfor %}
+								{% else %}
+									<tr>
+										<td><h3>Nothing here, try searching for something else.</h3></td>
+									</tr>
+								{% endif %}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
