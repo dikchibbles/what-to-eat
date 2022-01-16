@@ -226,6 +226,11 @@ def dessert():
     return random_dish('dessert')
 
 
+@app.route('/search/<recipe_name>')
+def search_recipe(recipe_name):
+    return render_template('index.html')
+
+
 @app.route('/recipe/<int:recipe_id>')
 @login_required
 def get_recipe(recipe_id):

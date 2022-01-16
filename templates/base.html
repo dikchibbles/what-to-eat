@@ -13,72 +13,70 @@
     <link rel="stylesheet" href="{{url_for('static', filename='css/styles.css')}}">
 </head>
 <body>
-<div class="container main">
-    <a class="brand" href="{{ url_for('home') }}"><h1 class="brand">What to Eat?</h1></a>
-</div>
-<div class="container navigation">
-    <div class="row justify-content-md-center">
-        <div class="col-lg-6 col-md-10 col-sm-12">
-            <div class="shadow p-3 mb-5 bg-body rounded">
-                <nav class="navbar navbar-expand-lg navbar-light">
-                    <div class="container-fluid">
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                          <span class="navbar-toggler-icon"></span>
-                        </button>
-                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            {% if not current_user.is_authenticated %}
-                                <li class="nav-item">
-                                  <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-                                </li>
-                                <li class="nav-item">
-                                  <a class="nav-link" href="{{ url_for('register') }}">Register</a>
-                                </li>
-                            {% else %}
-                             <li class="nav-item">
-                              <a class="nav-link" href="{{ url_for('favorites') }}">Favorites</a>
-                             </li>
-                             {% endif %}
-                            <li class="nav-item dropdown">
-                              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Dish Type
-                              </a>
-                              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('appetizer') }}">Appetizer</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main') }}">Main</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('dessert') }}">Dessert</a></li>
-                              </ul>
-                            </li>
-                              <li class="nav-item dropdown">
-                                  <a class="nav-link dropdown-toggle" href="#" id="dietDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Diet
+    <div class="container main">
+        <a class="brand" href="{{ url_for('home') }}"><h1 class="brand">What to Eat?</h1></a>
+    </div>
+    <div class="container navigation">
+        <div class="row justify-content-md-center">
+            <div class="col-lg-6 col-md-10 col-sm-12">
+                <div class="shadow p-3 mb-5 bg-body rounded">
+                    <nav class="navbar navbar-expand-lg navbar-light">
+                        <div class="container-fluid ">
+                            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                              <span class="navbar-toggler-icon"></span>
+                            </button>
+                            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                                {% if not current_user.is_authenticated %}
+                                    <li class="nav-item">
+                                      <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                                    </li>
+                                    <li class="nav-item">
+                                      <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                                    </li>
+                                {% else %}
+                                 <li class="nav-item">
+                                  <a class="nav-link" href="{{ url_for('favorites') }}">Favorites</a>
+                                 </li>
+                                 {% endif %}
+                                <li class="nav-item dropdown">
+                                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Dish Type
                                   </a>
-                                  <ul class="dropdown-menu" aria-labelledby="dietDropdown">
+                                  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                     <li><a class="dropdown-item" href="{{ url_for('appetizer') }}">Appetizer</a></li>
                                     <li><a class="dropdown-item" href="{{ url_for('main') }}">Main</a></li>
                                     <li><a class="dropdown-item" href="{{ url_for('dessert') }}">Dessert</a></li>
                                   </ul>
-                              </li>
-                            {% if current_user.is_authenticated %}
-                              <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-                              </li>
-                             {% endif %}
-                          </ul>
+                                </li>
+                                  <li class="nav-item dropdown">
+                                      <a class="nav-link dropdown-toggle" href="#" id="dietDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Diet
+                                      </a>
+                                      <ul class="dropdown-menu" aria-labelledby="dietDropdown">
+                                        <li><a class="dropdown-item" href="{{ url_for('appetizer') }}">Appetizer</a></li>
+                                        <li><a class="dropdown-item" href="{{ url_for('main') }}">Main</a></li>
+                                        <li><a class="dropdown-item" href="{{ url_for('dessert') }}">Dessert</a></li>
+                                      </ul>
+                                  </li>
+                                {% if current_user.is_authenticated %}
+                                  <li class="nav-item">
+                                    <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                                  </li>
+                                 {% endif %}
+                              </ul>
+                            </div>
                         </div>
-                    </div>
-                </nav>
+                    </nav>
+                </div>
             </div>
         </div>
     </div>
-</div>
 {% block content %}
 {% endblock %}
 <footer>
     <div class="container footer">
-        <div class="row">
-            <p>Copyright &copy; <script>document.write(new Date().getFullYear())</script> Leo Bred</p>
-        </div>
+        <p>Copyright &copy; <script>document.write(new Date().getFullYear())</script> Leo Bred</p>
     </div>
 </footer>
 </body>

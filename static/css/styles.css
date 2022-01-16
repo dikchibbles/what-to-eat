@@ -6,14 +6,10 @@ p {
     margin-bottom: 0!important;
 }
 
+
 .container.footer  {
     text-align: center;
-}
 
-footer {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
 }
 
 .submit {
