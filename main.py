@@ -10,6 +10,8 @@ from sqlalchemy.orm import relationship
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from functools import wraps
 from forms import LoginForm, RegisterForm
+from flask_migrate import Migrate
+
 
 
 app = Flask(__name__)
@@ -19,6 +21,9 @@ app.config['SECRET_KEY'] = str(os.environ.get('SECRET_KEY'))
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('POSTGRES_DATABASE_URL', 'sqlite:///users.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+### Database Migrations
+migrate = Migrate(app, db)
 
 ### CSRF Protection
 csrf = CSRFProtect(app)
@@ -34,6 +39,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     favorites = relationship("Favorite", back_populates="owner")
+    ratings = relationship("Rating", back_populates="rating_owner")
 
 
 class Favorite(db.Model):
@@ -43,6 +49,15 @@ class Favorite(db.Model):
     recipe_name = db.Column(db.String(200), nullable=False)
     owner_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     owner = relationship("User", back_populates="favorites")
+
+
+class Rating(db.Model):
+    __tablename__ = 'ratings'
+    id = db.Column(db.Integer, primary_key=True)
+    recipe_id = db.Column(db.Integer, nullable=False)
+    likes = db.Column(db.Integer)
+    dislikes = db.Column(db.Integer)
+    owner = relationship("User", back_populates="ratings")
 
 
 # db.create_all()
