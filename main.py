@@ -39,7 +39,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     favorites = relationship("Favorite", back_populates="owner")
-    ratings = relationship("Rating", back_populates="rating_owner")
+    ratings = relationship("Rating", back_populates="owner")
 
 
 class Favorite(db.Model):
@@ -57,7 +57,7 @@ class Rating(db.Model):
     recipe_id = db.Column(db.Integer, nullable=False)
     likes = db.Column(db.Integer)
     dislikes = db.Column(db.Integer)
-    rating_owner = relationship("User", back_populates="ratings")
+    owner = relationship("User", back_populates="ratings")
 
 
 # db.create_all()
