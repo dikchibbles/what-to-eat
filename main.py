@@ -57,6 +57,7 @@ class Rating(db.Model):
     recipe_id = db.Column(db.Integer, nullable=False)
     likes = db.Column(db.Integer)
     dislikes = db.Column(db.Integer)
+    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     owner = relationship("User", back_populates="ratings")
 
 
