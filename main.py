@@ -41,7 +41,6 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     favorites = relationship("Favorite", back_populates="owner")
-    ratings = relationship("Rating", back_populates="owner")
 
 
 class Favorite(db.Model):
@@ -57,10 +56,8 @@ class Rating(db.Model):
     __tablename__ = 'ratings'
     id = db.Column(db.Integer, primary_key=True)
     recipe_id = db.Column(db.Integer, nullable=False)
-    likes = db.Column(db.Integer)
-    dislikes = db.Column(db.Integer)
-    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    owner = relationship("User", back_populates="ratings")
+    likes = db.Column(db.Boolean, nullable=False)
+    dislikes = db.Column(db.Boolean, nullable=False)
 
 
 # db.create_all()
@@ -178,6 +175,22 @@ def home():
                            category=category,
                            current_user=current_user,
                            recipe_id=recipe_id)
+
+
+@app.route('/add-rating-like/<int:recipe_id>')
+@login_required
+def add_rating_like(recipe_id):
+     if request.method == 'POST':
+         new_rating = Rating(
+             recipe_id=recipe_id,
+             likes='sadf'
+         )
+
+@app.route('/add-rating-dislike/<int:recipe_id>')
+@login_required
+def add_rating_dislike(recipe_id):
+    if request.method == 'POST':
+        pass
 
 
 @app.route('/register', methods=['GET', 'POST'])
