@@ -44,16 +44,30 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-12 text-center">
+                        <div class="col-6 text-center">
                             {% if likes %}
                                 <p>{{ likes }}</p>
                             {% else %}
                                 <p>0</p>
                             {% endif %}
+                            {% if current_user.is_authenticated %}
+                                <form action="{{ url_for('add_rating_like', recipe_id=recipe_id) }}" method="post">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="submit" name="add" value="Add" class="btn btn-primary btn-sm">Like</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                        <div class="col-6 text-center">
                             {% if dislikes %}
                                 <p>{{ dislikes }}</p>
                             {% else %}
                                 <p>0</p>
+                            {% endif %}
+                            {% if current_user.is_authenticated %}
+                                <form action="{{ url_for('add_rating_dislike', recipe_id=recipe_id) }}" method="post">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="submit" name="add" value="Add" class="btn btn-primary btn-sm">Dislike</button>
+                                </form>
                             {% endif %}
                         </div>
                     </div>

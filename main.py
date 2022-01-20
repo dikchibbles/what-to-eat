@@ -116,7 +116,7 @@ def home():
     return main_page('index.html', current_user, Rating, recipe)
 
 
-@app.route('/add-rating-like/<int:recipe_id>')
+@app.route('/add-rating-like/<int:recipe_id>', methods=['GET', 'POST'])
 @login_required
 def add_rating_like(recipe_id):
     if request.method == 'POST':
@@ -127,14 +127,21 @@ def add_rating_like(recipe_id):
         )
         db.session.add(new_rating)
         db.session.commit()
-        return redirect(url_for(''))
+        return redirect(url_for('get_recipe', recipe_id=recipe_id))
 
 
-@app.route('/add-rating-dislike/<int:recipe_id>')
+@app.route('/add-rating-dislike/<int:recipe_id>', methods=['GET', 'POST'])
 @login_required
 def add_rating_dislike(recipe_id):
     if request.method == 'POST':
-        pass
+        new_rating = Rating(
+            recipe_id=recipe_id,
+            likes=False,
+            dislikes=True
+        )
+        db.session.add(new_rating)
+        db.session.commit()
+        return redirect(url_for('get_recipe', recipe_id=recipe_id))
 
 
 @app.route('/register', methods=['GET', 'POST'])
