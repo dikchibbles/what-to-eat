@@ -11,6 +11,7 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, cur
 from functools import wraps
 from forms import LoginForm, RegisterForm
 from flask_migrate import Migrate
+from funcs import main_page
 
 
 
@@ -99,38 +100,7 @@ def random_dish(dish_type):
     }
     response = requests.request("GET", url, headers=headers,
                                 params=querystring).json()
-    recipe = response['recipes'][0]
-    category = ''
-    for key in list(recipe)[:8]:
-        if recipe[key]:
-            load()
-            category_list = segment(key)
-            category = ' '.join(category_list).lower()
-            break
-    dish_name = recipe['title']
-    try:
-        image = recipe['image']
-    except KeyError:
-        url = "https://bing-image-search1.p.rapidapi.com/images/search"
-        querystring = {"q": f"{dish_name}"}
-        headers = {
-            'x-rapidapi-host': "bing-image-search1.p.rapidapi.com",
-            'x-rapidapi-key': "4122f3483amsh58a4641df90e077p13dbeejsn7d92b5bcd947"
-        }
-        response = requests.request("GET", url, headers=headers,
-                                    params=querystring).json()
-        image = response['value'][0]['thumbnailUrl']
-    instructions = recipe['instructions']
-    ingredients = [ingredient['original'] for ingredient in recipe['extendedIngredients']]
-    recipe_id = recipe['id']
-    return render_template('index.html',
-                           dish_name=dish_name,
-                           image=image,
-                           instructions=instructions,
-                           ingredients=ingredients,
-                           category=category,
-                           current_user=current_user,
-                           recipe_id=recipe_id)
+    return main_page(response, current_user, Rating)
 
 
 @app.route('/')
@@ -141,50 +111,22 @@ def home():
         'x-rapidapi-key': "4122f3483amsh58a4641df90e077p13dbeejsn7d92b5bcd947"
     }
     response = requests.get(url, headers=headers).json()
-    recipe = response['recipes'][0]
-    category = ''
-    for key in list(recipe)[:8]:
-        if recipe[key]:
-            load()
-            category_list = segment(key)
-            category = ' '.join(category_list).lower()
-            break
-    dish_name = recipe['title']
-    try:
-        image = recipe['image']
-    except KeyError:
-        url = "https://bing-image-search1.p.rapidapi.com/images/search"
-        querystring = {"q": f"{dish_name}"}
-        headers = {
-            'x-rapidapi-host': "bing-image-search1.p.rapidapi.com",
-            'x-rapidapi-key': "4122f3483amsh58a4641df90e077p13dbeejsn7d92b5bcd947"
-        }
-        response = requests.request("GET", url, headers=headers,
-                                    params=querystring).json()
-        image = response['value'][0]['thumbnailUrl']
-    instructions = recipe['instructions']
-    ingredients = []
-    for ingredient in recipe['extendedIngredients']:
-        ingredients.append(ingredient['original'])
-    recipe_id = recipe['id']
-    return render_template('index.html',
-                           dish_name=dish_name,
-                           image=image,
-                           instructions=instructions,
-                           ingredients=ingredients,
-                           category=category,
-                           current_user=current_user,
-                           recipe_id=recipe_id)
+    return main_page(response, current_user, Rating)
 
 
 @app.route('/add-rating-like/<int:recipe_id>')
 @login_required
 def add_rating_like(recipe_id):
-     if request.method == 'POST':
-         new_rating = Rating(
+    if request.method == 'POST':
+        new_rating = Rating(
              recipe_id=recipe_id,
-             likes='sadf'
-         )
+             likes=True,
+             dislikes=False
+        )
+        db.session.add(new_rating)
+        db.session.commit()
+        return redirect(url_for(''))
+
 
 @app.route('/add-rating-dislike/<int:recipe_id>')
 @login_required

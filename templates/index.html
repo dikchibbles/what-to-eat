@@ -43,6 +43,20 @@
                             <p class="instructions">{{ instructions | safe }}</p>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            {% if likes %}
+                                <p>{{ likes }}</p>
+                            {% else %}
+                                <p>0</p>
+                            {% endif %}
+                            {% if dislikes %}
+                                <p>{{ dislikes }}</p>
+                            {% else %}
+                                <p>0</p>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
