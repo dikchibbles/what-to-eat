@@ -54,7 +54,7 @@ class Favorite(db.Model):
 
 
 class Rating(db.Model):
-    __tablename__ = 'ratings'
+    __tablename__ = "ratings"
     id = db.Column(db.Integer, primary_key=True)
     recipe_id = db.Column(db.Integer, nullable=False)
     likes = db.Column(db.Boolean, nullable=False)
