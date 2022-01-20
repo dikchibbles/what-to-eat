@@ -3,8 +3,7 @@ from wordsegment import load, segment
 from flask import render_template
 
 
-def main_page(response, cur_user, rating):
-    recipe = response['recipes'][0]
+def main_page(template, cur_user, rating, recipe):
     category = ''
     for key in list(recipe)[:8]:
         if recipe[key]:
@@ -30,7 +29,7 @@ def main_page(response, cur_user, rating):
     recipe_id = recipe['id']
     all_likes = rating.query.filter_by(recipe_id=recipe_id, likes=True).count()
     all_dislikes = rating.query.filter_by(recipe_id=recipe_id, dislikes=True).count()
-    return render_template('index.html',
+    return render_template(template,
                            dish_name=dish_name,
                            image=image,
                            instructions=instructions,
