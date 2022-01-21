@@ -1,6 +1,8 @@
 import requests
 from wordsegment import load, segment
-from flask import render_template
+from flask import render_template, url_for
+from flask_mail import Message
+from itsdangerous import URLSafeTimedSerializer
 
 
 def main_page(template, cur_user, rating, recipe):
@@ -39,13 +41,21 @@ def main_page(template, cur_user, rating, recipe):
                            recipe_id=recipe_id,
                            likes=all_likes,
                            dislikes=all_dislikes)
-# def check_rating(recipe_id):
-#     """
-#     Finds all instances of the recipe_id in the DB
-#     and counts how many there are in the DB.
-#     """
-#     all_likes = Rating.query.filter_by(recipe_id=recipe_id, likes=True).count()
-#     all_dislikes = Rating.query.filter_by(recipe_id=recipe_id, dislikes=True).count()
-#     return all_likes, all_dislikes
+
+
+def send_email(subject, user_email, html, app, mail):
+    msg = Message(subject, sender=app.config['MAIL_USERNAME'], html=html, recipients=[user_email])
+    mail.send(msg)
+
+
+def send_confirmation_email(user_email, app, mail):
+    """Sends a confirmation email with the unique token to the user."""
+    confirm_serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    confirm_url = url_for(
+        'confirm_email',
+        token=confirm_serializer.dumps(user_email, salt=app.config['SECURITY_PASSWORD_SALT']),
+        _external=True)
+    html = render_template('email_confirmation.html', confirm_url=confirm_url)
+    send_email('Confirm Your Email Address', user_email, html, app, mail)
 
 

@@ -1,9 +1,11 @@
 from flask import Flask, session, render_template, redirect, abort, url_for, flash, request
+from itsdangerous import URLSafeTimedSerializer
 import requests
 import os
+from datetime import datetime
 from datetime import timedelta
 from flask_wtf.csrf import CSRFProtect
-from wordsegment import load, segment
+from flask_mail import Mail
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
@@ -11,18 +13,27 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, cur
 from functools import wraps
 from forms import LoginForm, RegisterForm
 from flask_migrate import Migrate
-from funcs import main_page
+from funcs import main_page, send_confirmation_email
 
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = str(os.environ.get('SECRET_KEY'))
+app.config['SECURITY_PASSWORD_SALT'] = str(os.environ.get('SECURITY_PASSWORD_SALT'))
 
 ### Database
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('POSTGRES_DATABASE_URL', 'sqlite:///users.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+### Mail
+mail = Mail(app)
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'chicknin8@gmail.com'
+app.config['MAIL_PASSWORD'] = 'Dreg!1@2'
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
 
 ### DB Migration
 migrate = Migrate(app, db)
@@ -41,6 +52,9 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(100), nullable=False)
+    email_confirmation_sent_on = db.Column(db.DateTime, nullable=True)
+    email_confirmed = db.Column(db.Boolean, nullable=True, default=False)
+    email_confirmed_on = db.Column(db.DateTime, nullable=True)
     favorites = relationship("Favorite", back_populates="owner")
 
 
@@ -165,8 +179,32 @@ def register():
             db.session.add(new_user)
             db.session.commit()
             login_user(new_user)
+            send_confirmation_email(new_user.email, app, mail)
+            flash('Thanks for registering!  Please check your email to confirm your email address.', 'success')
             return redirect(url_for('home'))
     return render_template("register.html", form=form)
+
+
+@app.route('/confirm/<token>')
+def confirm_email(token):
+    try:
+        confirm_serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+        email = confirm_serializer.loads(token, salt=app.config['SECURITY_PASSWORD_SALT'], max_age=3600)
+    except:
+        flash('The confirmation link is either invalid or has expired.', 'error')
+        return redirect(url_for('login'))
+
+    user = User.query.filter_by(email=email).first()
+    if user.email_confirmed:
+        flash('Account already confirmed. Please login.', 'success')
+        return redirect(url_for('login'))
+    else:
+        user.email_confirmed = True
+        user.email_confirmed_on = datetime.now()
+        db.session.add(user)
+        db.session.commit()
+        flash('Thank you for confirming your email address!')
+        return redirect(url_for('home'))
 
 
 @app.route('/login', methods=['GET', 'POST'])

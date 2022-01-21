@@ -1,6 +1,13 @@
 {% extends 'base.html' %}
 {% block title %}What to eat? | {{ dish_name }}{% endblock %}
 {% block content %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color:red;">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
 <div class="container holder">
     <div class="row justify-content-md-center">
         <div class="col-lg-6 col-md-10 col-sm-12">
