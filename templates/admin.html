@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container holder">
+    <div class="row justify-content-md-center">
+        <div class="col-lg-8 col-md-10 col-sm-12">
+            <div class="shadow p-3 mb-5 bg-body rounded">
+				<div class="container">
+					<div class="row justify-content-md-center">
+						<div class="col">
+							{% with messages = get_flashed_messages() %}
+								{% if messages %}
+									{% for message in messages %}
+										<p style="color:red;">{{ message }}</p>
+									{% endfor %}
+								{% endif %}
+							{% endwith %}
+							<table class="table">
+								{% if users %}
+									<thead>
+										<tr>
+											<th scope="col">Email</th>
+											<th scope="col">Delete</th>
+										</tr>
+									</thead>
+									<tbody>
+									{% for user in users %}
+										<tr>
+											<td>{{ user.email }}</td>
+											<td><a href="{{ url_for('delete_user', user_id=user.id) }}">╳</a></td>
+										</tr>
+									{% endfor %}
+								{% else %}
+									<tr>
+										<td><h3>No Users</h3></td>
+									</tr>
+								{% endif %}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

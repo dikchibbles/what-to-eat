@@ -27,13 +27,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 ### Mail
-mail = Mail(app)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'chicknin8@gmail.com'
-app.config['MAIL_PASSWORD'] = 'Dreg!1@2'
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = str(os.environ.get('MAIL_USERNAME'))
+app.config['MAIL_PASSWORD'] = str(os.environ.get('MAIL_PASSWORD'))
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
 
 ### DB Migration
 migrate = Migrate(app, db)
@@ -103,6 +103,22 @@ def forbidden_access(e):
 def before_request():
     session.permanent = True
     app.permanent_session_lifetime = timedelta(minutes=15)
+
+
+@app.route('/admin')
+@admin_only
+def admin():
+    all_users = User.query.all()
+    return render_template('admin.html', users=all_users[1:])
+
+
+@app.route('/delete-user/<int:user_id>')
+@admin_only
+def delete_user(user_id):
+    user_to_delete = User.query.get(user_id)
+    db.session.delete(user_to_delete)
+    db.session.commit()
+    return redirect(url_for('admin'))
 
 
 def random_dish(dish_type):
@@ -176,10 +192,10 @@ def register():
                 email=form.email.data.lower(),
                 password=hashed_password
             )
+            send_confirmation_email(new_user.email, app, mail)
             db.session.add(new_user)
             db.session.commit()
             login_user(new_user)
-            send_confirmation_email(new_user.email, app, mail)
             flash('Thanks for registering!  Please check your email to confirm your email address.', 'success')
             return redirect(url_for('home'))
     return render_template("register.html", form=form)
