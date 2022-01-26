@@ -7,6 +7,11 @@ p {
 }
 
 
+.password-reset {
+    text-decoration: none !important;
+}
+
+
 .container.footer  {
     text-align: center;
 

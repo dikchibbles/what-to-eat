@@ -6,18 +6,20 @@ from datetime import datetime
 from datetime import timedelta
 from flask_wtf.csrf import CSRFProtect
 from flask_mail import Mail
+from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from functools import wraps
-from forms import LoginForm, RegisterForm
+from forms import LoginForm, RegisterForm, ResetPasswordForm, EmailResetPasswordForm
 from flask_migrate import Migrate
-from funcs import main_page, send_confirmation_email
+from funcs import main_page, send_confirmation_email, send_password_reset_email
 
 
 
 app = Flask(__name__)
+load_dotenv('.env')
 app.config['SECRET_KEY'] = str(os.environ.get('SECRET_KEY'))
 app.config['SECURITY_PASSWORD_SALT'] = str(os.environ.get('SECURITY_PASSWORD_SALT'))
 
@@ -238,6 +240,49 @@ def login():
             flash('User with that email does not exist, please register.')
             return redirect(url_for('register'))
     return render_template("login.html", form=form)
+
+
+@app.route('/reset', methods=['GET', 'POST'])
+def reset():
+    form = EmailResetPasswordForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data.lower().strip()).first()
+        if user:
+            send_password_reset_email(user.email, app, mail)
+            flash('Confirmation email sent successfully, please check your email to reset password.')
+            return redirect('login')
+        elif not user:
+            flash('User with that email does not exist, please check your information.', 'error')
+            return redirect('reset')
+    return render_template('reset.html', form=form)
+
+
+@app.route('/reset/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    try:
+        confirm_serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+        email = confirm_serializer.loads(token, salt=app.config['SECURITY_PASSWORD_SALT'], max_age=3600)
+    except:
+        flash('The confirmation link is either invalid or has expired.', 'error')
+        return redirect(url_for('login'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=email).first()
+        new_password = generate_password_hash(
+                form.password.data,
+                method='pbkdf2:sha256',
+                salt_length=8
+            )
+        if user.password == new_password:
+            flash('You need to enter a password that is different from your previous password.', 'error')
+            return redirect(url_for('reset_password', token=token))
+        else:
+            user.password = new_password
+            db.session.add(user)
+            db.session.commit()
+            flash('Your password has been successfully reset. Please login with the new password.')
+            return redirect(url_for('login'))
+    return render_template('reset_password.html', form=form, token=token)
 
 
 @app.route('/logout')

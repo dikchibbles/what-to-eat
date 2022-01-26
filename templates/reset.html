@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Reset{% endblock %}
+{% block content %}
+<div class="container">
+	<div class="row justify-content-md-center">
+		<div class="col-lg-4 col-md-6 col-sm-12">
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+					{% for message in messages %}
+						<p style="color:red;">{{ message }}</p>
+					{% endfor %}
+				{% endif %}
+			{% endwith %}
+			<form action="{{ url_for('reset') }}" method="POST">
+				{{ form.csrf_token }}
+				<label for="InputEmail" class="form-label">Email</label>
+				{{ form.email(type="email", class="form-control", id="InputEmail", placeholder="Email") }}
+				<div class="submit">{{ form.send(type="submit", class="btn btn-primary") }}</div>
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock %}

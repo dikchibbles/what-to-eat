@@ -17,3 +17,14 @@ class RegisterForm(FlaskForm):
     submit = SubmitField("Register")
 
 
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField("New Password", validators=[DataRequired(), EqualTo('confirm_password', message='Passwords must match')])
+    confirm_password = PasswordField("Confirm New Password", validators=[DataRequired()])
+    reset = SubmitField("Reset")
+
+
+class EmailResetPasswordForm(FlaskForm):
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    send = SubmitField("Send Email Confirmation")
+
+

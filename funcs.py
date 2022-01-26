@@ -59,3 +59,14 @@ def send_confirmation_email(user_email, app, mail):
     send_email('Confirm Your Email Address', user_email, html, app, mail)
 
 
+def send_password_reset_email(user_email, app, mail):
+    """Sends an email with a password reset token."""
+    confirm_serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    reset_url = url_for(
+        'reset_password',
+        token=confirm_serializer.dumps(user_email, salt=app.config['SECURITY_PASSWORD_SALT']),
+        _external=True)
+    html = render_template('email_reset_password.html', reset_url=reset_url)
+    send_email('Password Reset', user_email, html, app, mail)
+
+
