@@ -40,6 +40,8 @@ mail = Mail(app)
 ### DB Migration
 migrate = Migrate(app, db)
 
+### GOOGLE API KEY
+GOOGLE_API_KEY = str(os.environ.get('GOOGLE_API_KEY'))
 
 ### CSRF Protection
 csrf = CSRFProtect(app)
@@ -133,7 +135,7 @@ def random_dish(dish_type):
     response = requests.request("GET", url, headers=headers,
                                 params=querystring).json()
     recipe = response['recipes'][0]
-    return main_page('index.html', current_user, Rating, recipe)
+    return main_page('index.html', current_user, Rating, recipe, GOOGLE_API_KEY)
 
 
 @app.route('/')
@@ -145,7 +147,7 @@ def home():
     }
     response = requests.get(url, headers=headers).json()
     recipe = response['recipes'][0]
-    return main_page('index.html', current_user, Rating, recipe)
+    return main_page('index.html', current_user, Rating, recipe, GOOGLE_API_KEY)
 
 
 @app.route('/add-rating-like/<int:recipe_id>', methods=['GET', 'POST'])
@@ -329,7 +331,7 @@ def get_recipe(recipe_id):
         'x-rapidapi-key': "4122f3483amsh58a4641df90e077p13dbeejsn7d92b5bcd947"
     }
     recipe = requests.get(url, headers=headers).json()
-    return main_page('index.html', current_user, Rating, recipe)
+    return main_page('index.html', current_user, Rating, recipe, GOOGLE_API_KEY)
 
 
 @app.route('/add_favorite/<int:recipe_id>/<recipe_name>', methods=['GET', 'POST'])

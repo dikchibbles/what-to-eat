@@ -5,7 +5,7 @@ from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer
 
 
-def main_page(template, cur_user, rating, recipe):
+def main_page(template, cur_user, rating, recipe, api_key):
     category = ''
     for key in list(recipe)[:8]:
         if recipe[key]:
@@ -31,6 +31,7 @@ def main_page(template, cur_user, rating, recipe):
     recipe_id = recipe['id']
     all_likes = rating.query.filter_by(recipe_id=recipe_id, likes=True).count()
     all_dislikes = rating.query.filter_by(recipe_id=recipe_id, dislikes=True).count()
+    video_id = find_youtube_video_id(api_key, dish_name)
     return render_template(template,
                            dish_name=dish_name,
                            image=image,
@@ -40,7 +41,8 @@ def main_page(template, cur_user, rating, recipe):
                            current_user=cur_user,
                            recipe_id=recipe_id,
                            likes=all_likes,
-                           dislikes=all_dislikes)
+                           dislikes=all_dislikes,
+                           video_id=video_id)
 
 
 def send_email(subject, user_email, html, app, mail):
@@ -68,5 +70,18 @@ def send_password_reset_email(user_email, app, mail):
         _external=True)
     html = render_template('email_reset_password.html', reset_url=reset_url)
     send_email('Password Reset', user_email, html, app, mail)
+
+
+def find_youtube_video_id(key, dish):
+    url = "https://youtube.googleapis.com/youtube/v3/search"
+    params = {
+        'part': 'id',
+        'regionCode': 'US',
+        'q': dish,
+        'key': key,
+    }
+    response = requests.get(url, params=params).json()
+    video_id = response['items'][0]['id']['videoId']
+    return video_id
 
 
